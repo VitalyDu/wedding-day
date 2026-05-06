@@ -13,8 +13,9 @@
   // Создайте бота через @BotFather, вставьте сюда токен.
   // chat_id — id чата, куда бот будет писать (можно узнать у @userinfobot
   // или @getmyid_bot, переслав боту любое сообщение из нужного чата).
-  const TELEGRAM_BOT_TOKEN = ""; // напр. "1234567890:AAH..."
-  const TELEGRAM_CHAT_ID = ""; // напр. "123456789"
+  const TELEGRAM_BOT_TOKEN = "8775046711:AAHsShRArTZI4iYeoVu6sMKqHhkF17tlaLA"; // напр. "1234567890:AAH..."
+  const TELEGRAM_CHAT_ID = "413516488"; // напр. "123456789"
+  const TELEGRAM_CHAT_ID_TWO = "202942338";
 
   const WEDDING_DATE = new Date("2026-09-12T15:00:00+03:00");
 
@@ -22,7 +23,7 @@
   // AOS init
   // ----------------------------------------------------------
   const reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
+    "(prefers-reduced-motion: reduce)",
   ).matches;
 
   if (window.AOS) {
@@ -87,10 +88,7 @@
         const rect = timeline.getBoundingClientRect();
         const vh = window.innerHeight || document.documentElement.clientHeight;
         const total = rect.height + vh * 0.5;
-        const progressed = Math.min(
-          Math.max(vh * 0.85 - rect.top, 0),
-          total
-        );
+        const progressed = Math.min(Math.max(vh * 0.85 - rect.top, 0), total);
         const ratio = Math.min(progressed / total, 1);
         const offset = len * (1 - ratio);
         linePath.style.strokeDashoffset = String(offset);
@@ -111,7 +109,7 @@
             }
           });
         },
-        { threshold: 0.45 }
+        { threshold: 0.45 },
       );
       items.forEach((it) => io.observe(it));
     }
@@ -178,12 +176,12 @@
     }, 300);
   }
 
-  document.querySelectorAll("[data-rsvp-open]").forEach((b) =>
-    b.addEventListener("click", openModal)
-  );
-  document.querySelectorAll("[data-rsvp-close]").forEach((b) =>
-    b.addEventListener("click", closeModal)
-  );
+  document
+    .querySelectorAll("[data-rsvp-open]")
+    .forEach((b) => b.addEventListener("click", openModal));
+  document
+    .querySelectorAll("[data-rsvp-close]")
+    .forEach((b) => b.addEventListener("click", closeModal));
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal?.classList.contains("is-open")) {
       closeModal();
@@ -242,8 +240,7 @@
       if (!ok) {
         wrap?.classList.add("is-error");
         if (fullNameError)
-          fullNameError.textContent =
-            "Укажите имя и фамилию (два слова)";
+          fullNameError.textContent = "Укажите имя и фамилию (два слова)";
       } else {
         wrap?.classList.remove("is-error");
         if (fullNameError) fullNameError.textContent = "";
@@ -273,7 +270,7 @@
         `<i>Отправлено ${new Date().toLocaleString("ru-RU", {
           dateStyle: "short",
           timeStyle: "short",
-        })}</i>`
+        })}</i>`,
       );
       return parts.join("\n");
     }
@@ -286,31 +283,41 @@
     }
 
     async function sendToTelegram(data) {
-      if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+      const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_CHAT_ID_TWO]
+        .map((id) => String(id || "").trim())
+        .filter(Boolean);
+      const uniqueChatIds = [...new Set(chatIds)];
+
+      if (!TELEGRAM_BOT_TOKEN || uniqueChatIds.length === 0) {
         // No credentials yet — pretend success and log to console for development.
         console.info(
           "[RSVP] (no telegram credentials configured)",
-          JSON.stringify(data)
+          JSON.stringify(data),
         );
         await new Promise((r) => setTimeout(r, 600));
         return { ok: true, simulated: true };
       }
       const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: buildMessage(data),
-          parse_mode: "HTML",
-          disable_web_page_preview: true,
+      const payload = {
+        text: buildMessage(data),
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      };
+      const results = await Promise.all(
+        uniqueChatIds.map(async (chat_id) => {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, chat_id }),
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || !json.ok) {
+            throw new Error(json.description || `HTTP ${res.status}`);
+          }
+          return json;
         }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) {
-        throw new Error(json.description || `HTTP ${res.status}`);
-      }
-      return json;
+      );
+      return results;
     }
 
     function showSuccess() {

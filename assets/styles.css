@@ -283,7 +283,7 @@ section {
   width: 64px;
   height: 64px;
   border: 1.5px solid var(--c-line);
-  border-radius: 28% 12% 24% 14% / 22% 14% 28% 12%;
+  border-radius: 28% 0% 24% 0% / 22% 0% 28% 0%;
   pointer-events: none;
 }
 .frame--brackets::before {
@@ -291,14 +291,14 @@ section {
   left: 0;
   border-right: 0;
   border-bottom: 0;
-  transform: rotate(-2deg);
+  /* transform: rotate(-2deg); */
 }
 .frame--brackets::after {
   bottom: 0;
   right: 0;
   border-left: 0;
   border-top: 0;
-  transform: rotate(-2deg);
+  /* transform: rotate(-2deg); */
 }
 
 /* ============================================================
@@ -329,7 +329,7 @@ section {
 
 .hero__caption {
   font-family: var(--f-script);
-  font-size: clamp(22px, 2.8vw, 28px);
+  font-size: clamp(32px, 2.8vw, 48px);
   letter-spacing: 0.06em;
   color: var(--c-wine);
   margin: 0;
@@ -339,10 +339,10 @@ section {
 .hero__names {
   font-family: var(--f-serif);
   font-weight: 400;
-  font-size: clamp(56px, 11vw, 132px);
+  font-size: clamp(56px, 11vw, 98px);
   line-height: 1;
   letter-spacing: -0.01em;
-  margin: 8px 0;
+  margin: 8px 0 0 0;
   display: inline-flex;
   align-items: baseline;
   gap: 0.18em;
@@ -360,14 +360,14 @@ section {
 }
 
 .hero__envelope {
-  width: clamp(140px, 22vw, 200px);
+  /* width: clamp(140px, 22vw, 200px); */
   margin: 14px 0 6px;
   color: var(--c-ink);
 }
-.hero__envelope svg {
-  width: 100%;
+.hero__envelope img {
+  max-width: 180px;
   height: auto;
-  overflow: visible;
+  object-fit: contain;
 }
 
 .hero__intro {
@@ -381,6 +381,7 @@ section {
 .hero__date {
   font-family: var(--f-script);
   font-size: clamp(36px, 6vw, 56px);
+  line-height: 100%;
   margin: 4px 0 18px;
   color: var(--c-wine);
   font-weight: 500;
@@ -391,30 +392,6 @@ section {
   margin-top: 6px;
 }
 
-.hero__decor {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0.85;
-  z-index: 1;
-}
-.hero__decor img {
-  width: 100%;
-  height: auto;
-  filter: contrast(1.05);
-}
-.hero__decor--candelabra {
-  top: 8%;
-  left: 4%;
-  width: clamp(80px, 14vw, 200px);
-  animation: floatY 7s ease-in-out infinite;
-}
-.hero__decor--bouquet {
-  bottom: 6%;
-  right: 4%;
-  width: clamp(90px, 16vw, 220px);
-  animation: floatY 8s ease-in-out -2s infinite;
-}
-
 @keyframes floatY {
   0%,
   100% {
@@ -423,31 +400,6 @@ section {
   50% {
     transform: translateY(-12px);
   }
-}
-
-/* Envelope draw-in */
-.hero__envelope svg path,
-.hero__envelope svg rect {
-  stroke-dasharray: 800;
-  stroke-dashoffset: 800;
-  animation: drawIn 2.4s var(--ease) 0.3s forwards;
-}
-.hero__envelope .env-flap {
-  transform-origin: 50% 32px;
-  animation:
-    drawIn 1.8s var(--ease) 0.3s forwards,
-    flapOpen 1.4s var(--ease) 2.4s forwards;
-}
-.hero__envelope .env-heart {
-  opacity: 0;
-  transform: translateY(8px) scale(0.95);
-  transform-origin: 100px 50px;
-  animation: heartIn 0.8s var(--ease) 3.2s forwards;
-}
-.hero__envelope .env-heart path {
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: drawIn 1.4s var(--ease) 3.4s forwards;
 }
 
 @keyframes drawIn {
@@ -484,6 +436,8 @@ section {
   line-height: 1;
   margin: -20px 0 6px;
   font-weight: 300;
+  margin-top: -8px;
+  margin-bottom: 24px;
 }
 
 .save-date__d {
@@ -737,37 +691,45 @@ section {
 }
 
 .wishes__layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
   align-items: center;
   justify-items: center;
   margin-top: 12px;
 }
-@media (min-width: 880px) {
-  .wishes__layout {
-    grid-template-columns: 1fr minmax(auto, 480px) 1fr;
-  }
-}
 
-.wishes__decor {
-  width: clamp(140px, 22vw, 220px);
-  height: auto;
-  opacity: 0.85;
-}
-.wishes__decor img {
-  width: 100%;
-  height: auto;
-}
-.wishes__decor--bucket {
-  order: 1;
-}
-.wishes__decor--bouquet {
-  order: 3;
-}
 .wishes__frame {
   order: 2;
   background: rgba(255, 255, 255, 0.4);
+  overflow: visible;
+}
+
+.wishes__heart {
+  position: absolute;
+  width: clamp(86px, 8vw, 86px);
+  height: clamp(86px, 8vw, 86px);
+  z-index: 2;
+  pointer-events: none;
+}
+.wishes__heart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.wishes__heart path {
+  fill: #7d2b30;
+}
+.wishes__heart--br {
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+}
+
+@media (max-width: 600px) {
+  .wishes__heart--br {
+    display: none;
+  }
 }
 
 .wishes__text {
@@ -1306,10 +1268,6 @@ section {
    ============================================================ */
 
 @media (max-width: 600px) {
-  .hero__decor--candelabra,
-  .hero__decor--bouquet {
-    opacity: 0.55;
-  }
   .countdown {
     padding: 18px 16px;
     gap: 10px;
@@ -1350,19 +1308,5 @@ section {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  .hero__envelope svg path,
-  .hero__envelope svg rect {
-    stroke-dashoffset: 0 !important;
-  }
-  .hero__envelope .env-flap {
-    transform: rotateX(170deg);
-  }
-  .hero__envelope .env-heart {
-    opacity: 1;
-    transform: none;
-  }
-  .timeline__line path {
-    stroke-dashoffset: 0 !important;
   }
 }
