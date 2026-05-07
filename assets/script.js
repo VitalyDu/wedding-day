@@ -16,6 +16,9 @@
   const TELEGRAM_BOT_TOKEN = "8775046711:AAHsShRArTZI4iYeoVu6sMKqHhkF17tlaLA"; // напр. "1234567890:AAH..."
   const TELEGRAM_CHAT_ID = "413516488"; // напр. "123456789"
   const TELEGRAM_CHAT_ID_TWO = "202942338";
+  // Необязательно: кастомный proxy URL для POST-запроса sendMessage.
+  // Если пусто, будет использован случайный публичный CORS proxy (менее безопасно).
+  const TELEGRAM_PROXY_URL = ""; // напр. "https://your-proxy.example/sendMessage"
 
   const WEDDING_DATE = new Date("2026-09-12T15:00:00+03:00");
 
@@ -297,26 +300,66 @@
         await new Promise((r) => setTimeout(r, 600));
         return { ok: true, simulated: true };
       }
-      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const directUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const publicProxyBuilders = [
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url) => `https://cors.isomorphic-git.org/${url}`,
+      ];
+      const shuffledPublicProxyBuilders = publicProxyBuilders
+        .map((buildUrl) => ({ buildUrl, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ buildUrl }) => buildUrl);
+
+      const requestTargets = [];
+      if (TELEGRAM_PROXY_URL) {
+        requestTargets.push({
+          name: "custom-proxy",
+          url: TELEGRAM_PROXY_URL,
+          toBody: (chat_id, payload) => ({ ...payload, chat_id }),
+        });
+      } else {
+        shuffledPublicProxyBuilders.forEach((buildProxyUrl, idx) => {
+          requestTargets.push({
+            name: `public-proxy-${idx + 1}`,
+            url: buildProxyUrl(directUrl),
+            toBody: (chat_id, payload) => ({ ...payload, chat_id }),
+          });
+        });
+      }
+      requestTargets.push({
+        name: "direct",
+        url: directUrl,
+        toBody: (chat_id, payload) => ({ ...payload, chat_id }),
+      });
       const payload = {
         text: buildMessage(data),
         parse_mode: "HTML",
         disable_web_page_preview: true,
       };
-      const results = await Promise.all(
-        uniqueChatIds.map(async (chat_id) => {
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payload, chat_id }),
-          });
-          const json = await res.json().catch(() => ({}));
-          if (!res.ok || !json.ok) {
-            throw new Error(json.description || `HTTP ${res.status}`);
+
+      async function sendMessage(chat_id) {
+        let lastError = null;
+        for (const target of requestTargets) {
+          try {
+            const res = await fetch(target.url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(target.toBody(chat_id, payload)),
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok || !json.ok) {
+              throw new Error(json.description || `HTTP ${res.status}`);
+            }
+            return json;
+          } catch (err) {
+            lastError = err;
+            console.warn(`[RSVP] ${target.name} send failed`, err);
           }
-          return json;
-        }),
-      );
+        }
+        throw lastError || new Error("Не удалось отправить запрос в Telegram");
+      }
+
+      const results = await Promise.all(uniqueChatIds.map(sendMessage));
       return results;
     }
 
