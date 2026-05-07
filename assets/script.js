@@ -287,6 +287,10 @@
         .replace(/>/g, "&gt;");
     }
 
+    function isGoogleAppsScriptUrl(url) {
+      return /https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(url);
+    }
+
     async function sendToTelegram(data) {
       const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_CHAT_ID_TWO]
         .map((id) => String(id || "").trim())
@@ -343,10 +347,24 @@
         let lastError = null;
         for (const target of requestTargets) {
           try {
+            const body = JSON.stringify(target.toBody(chat_id, payload));
+
+            if (isGoogleAppsScriptUrl(target.url)) {
+              // GAS web apps do not expose CORS headers for browser preflight.
+              // Send as a simple no-cors request; network errors still throw.
+              await fetch(target.url, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body,
+              });
+              return { ok: true, via: "google-apps-script" };
+            }
+
             const res = await fetch(target.url, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(target.toBody(chat_id, payload)),
+              body,
             });
             const json = await res.json().catch(() => ({}));
             if (!res.ok || !json.ok) {
