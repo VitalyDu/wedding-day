@@ -17,8 +17,10 @@
   const TELEGRAM_CHAT_ID = "413516488"; // напр. "123456789"
   const TELEGRAM_CHAT_ID_TWO = "202942338";
   // Необязательно: кастомный proxy URL для POST-запроса sendMessage.
+  // Рекомендуемо: Google Apps Script Web App URL (бесплатно) — см. assets/google-apps-script-relay.gs
   // Если пусто, будет использован случайный публичный CORS proxy (менее безопасно).
-  const TELEGRAM_PROXY_URL = ""; // напр. "https://your-proxy.example/sendMessage"
+  const TELEGRAM_PROXY_URL =
+    "https://script.google.com/macros/s/AKfycbzCypttZsQVTm4n94nBVDjyx1tOguhIcn2Qtlgz4rjF3b6usvXSN_6nv3JjsLO7jKWllg/exec"; // напр. "https://script.google.com/macros/s/<DEPLOY_ID>/exec"
 
   const WEDDING_DATE = new Date("2026-09-12T15:00:00+03:00");
 
