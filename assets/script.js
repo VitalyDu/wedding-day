@@ -22,7 +22,7 @@
   const TELEGRAM_PROXY_URL =
     "https://script.google.com/macros/s/AKfycbzCypttZsQVTm4n94nBVDjyx1tOguhIcn2Qtlgz4rjF3b6usvXSN_6nv3JjsLO7jKWllg/exec"; // напр. "https://script.google.com/macros/s/<DEPLOY_ID>/exec"
 
-  const WEDDING_DATE = new Date("2026-09-12T15:00:00+03:00");
+  const WEDDING_DATE = new Date("2026-09-12T13:30:00+03:00");
 
   // ----------------------------------------------------------
   // AOS init

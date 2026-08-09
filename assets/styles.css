@@ -1165,14 +1165,59 @@ section {
   font-weight: 500;
 }
 
-.rsvp-cta__btn {
-  margin-top: 12px;
+.rsvp-closed__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px auto 28px;
+  padding: 10px 22px 10px 14px;
+  border: 1px dashed var(--c-line-soft);
+  border-radius: 999px;
+  background: var(--c-bg-soft);
 }
-.rsvp-cta__btn svg {
-  transition: transform 0.32s var(--ease);
+
+.rsvp-closed__icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: var(--c-wine);
 }
-.rsvp-cta__btn:hover svg {
-  transform: scale(1.15);
+.rsvp-closed__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.rsvp-closed__label {
+  font-family: var(--f-sans);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-ink-soft);
+}
+
+.rsvp-closed__wish {
+  font-family: var(--f-script);
+  font-size: clamp(24px, 3.4vw, 32px);
+  line-height: 1.4;
+  color: var(--c-ink);
+  max-width: 620px;
+  margin: 0 auto;
+}
+.rsvp-closed__wish strong {
+  color: var(--c-wine);
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .rsvp-closed__badge {
+    gap: 10px;
+    padding: 9px 16px 9px 12px;
+  }
+  .rsvp-closed__label {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
 }
 
 /* ============================================================
